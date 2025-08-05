@@ -9,20 +9,19 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        $this->authorize('viewAny', User::class);
-        return response()->json(User::all(['id', 'name', 'email', 'role', 'created_at']));
-    }
-
-    public function profile(Request $request)
-    {
-        return response()->json($request->user());
+    public function getAll(Request $request)
+    {   
+        $user = User::all();
+        return response()->json([
+            'message' => "",
+            'data' => $user,
+            'status' => true
+        ], 200);
     }
 
     public function register(Request $request)
     {   
-        $rs = User::where("email",$request->input("email") )->get();
+        $rs = User::where("email",$request->input("email") )->first();
         $message = "";
         $status = false;
         $data = [];
@@ -94,6 +93,21 @@ class UserController extends Controller
             ];
             $status = true;
         }
+
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status
+        ], 200);
+    }
+
+    public function auth(Request $request)
+    {   
+        $message = "";
+        $status = false;
+        $data = [];
+        
+        $data = $request->input("tema");
 
         return response()->json([
             'message' => $message,

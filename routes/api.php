@@ -6,34 +6,48 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Hash;
 
 // Ruta pública: Registro
-Route::post('/register', [UserController::class, 'register']);
-
-// Ruta pública: Login (API pura, sin sesiones web)
-Route::post('/login', function (Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    $user = \App\Models\User::where('email', $request->email)->first();
-
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['error' => 'Credenciales inválidas'], 401);
-    }
-
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-        ]
-    ]);
+Route::group([
+    "prefix"=>"v1", 
+    "namespace" => "App\Http\Controller\Api",
+], function (){
+    Route::get("healthy", function(){
+        return ["status" => true, "data" => "Estado server activo"];
+    });
+    Route::post('/register', [UserController::class, 'register']);
+    Route::post('/login', [UserController::class, 'login']);
+    
+    // Ruta pública: Login (API pura, sin sesiones web)
+    // Route::post('/login', function (Request $request) {
+    //     $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required',
+    //     ]);
+    
+    //     $user = \App\Models\User::where('email', $request->email)->first();
+    
+    //     if (!$user || !Hash::check($request->password, $user->password)) {
+    //         return response()->json(['error' => 'Credenciales inválidas'], 401);
+    //     }
+    
+    //     $token = $user->createToken('auth_token')->plainTextToken;
+    
+    //     return response()->json([
+    //         'message' => $message,
+    //         'data' => [
+    //             'access_token' => $token,
+    //             'token_type' => 'Bearer',
+    //             'user' => [
+    //                 'id' => $user->id,
+    //                 'name' => $user->name,
+    //                 'email' => $user->email,
+    //                 'role' => $user->role,
+    //             ]
+    //         ],
+    //         'status' => $status
+    //     ], 200);
+    // });
 });
+
 
 // Rutas protegidas por Sanctum
 Route::middleware('auth:sanctum')->group(function () {
